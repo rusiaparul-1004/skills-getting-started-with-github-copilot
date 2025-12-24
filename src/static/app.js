@@ -22,11 +22,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const spotsLeft = details.max_participants - details.participants.length;
         if (spotsLeft <= 0) activityCard.classList.add("activity-full");
 
-        // Build participants section
-        const participantsHtml =
-          details.participants && details.participants.length > 0
-            ? `<ul class="participants-list">${details.participants.map(p => `<li>${p}</li>`).join("")}</ul>`
-            : `<p class="no-participants">No participants yet</p>`;
+        // Build participants section with delete icon
+        let participantsHtml = "";
+        if (details.participants && details.participants.length > 0) {
+          participantsHtml = `<ul class="participants-list">${details.participants.map(p => `
+            <li class="participant-item">
+              <span class="participant-email">${p}</span>
+              <span class="delete-participant" title="Remove participant" data-activity="${name}" data-email="${p}">&#128465;</span>
+            </li>`).join("")}</ul>`;
+        } else {
+          participantsHtml = `<p class="no-participants">No participants yet</p>`;
+        }
 
         activityCard.innerHTML = `
           <h4>${name}</h4>
@@ -47,6 +53,28 @@ document.addEventListener("DOMContentLoaded", () => {
         option.textContent = spotsLeft <= 0 ? `${name} (Full)` : name;
         if (spotsLeft <= 0) option.disabled = true;
         activitySelect.appendChild(option);
+      });
+
+      // Add event listeners for delete icons
+      document.querySelectorAll('.delete-participant').forEach(icon => {
+        icon.addEventListener('click', async (e) => {
+          const activity = icon.getAttribute('data-activity');
+          const email = icon.getAttribute('data-email');
+          if (confirm(`Remove ${email} from ${activity}?`)) {
+            try {
+              const res = await fetch(`/activities/${encodeURIComponent(activity)}/participants/${encodeURIComponent(email)}`, {
+                method: 'DELETE'
+              });
+              if (res.ok) {
+                fetchActivities();
+              } else {
+                alert('Failed to remove participant.');
+              }
+            } catch {
+              alert('Error removing participant.');
+            }
+          }
+        });
       });
     } catch (error) {
       activitiesList.innerHTML = "<p>Failed to load activities. Please try again later.</p>";

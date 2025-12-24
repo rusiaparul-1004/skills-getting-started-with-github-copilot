@@ -1,3 +1,15 @@
+
+# ...existing code...
+
+@app.delete("/activities/{activity_name}/participants/{email}", status_code=204)
+def remove_participant(activity_name: str, email: str):
+    if activity_name not in activities:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    participants = activities[activity_name]["participants"]
+    if email not in participants:
+        raise HTTPException(status_code=404, detail="Participant not found")
+    participants.remove(email)
+    return
 """
 High School Management System API
 
