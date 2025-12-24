@@ -101,6 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (response.ok) {
         messageDiv.textContent = result.message;
+        fetchActivities();
         messageDiv.className = "success";
         signupForm.reset();
 
